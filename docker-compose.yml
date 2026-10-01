@@ -1,0 +1,110 @@
+services:
+
+  # ==========================================================
+  # MySQL Database
+  # ==========================================================
+  mysql:
+    image: mysql:8.4
+    container_name: income-statement-mysql
+
+    restart: unless-stopped
+
+    environment:
+      MYSQL_DATABASE: income_statement_db
+      MYSQL_USER: income_user
+      MYSQL_PASSWORD: income_password
+      MYSQL_ROOT_PASSWORD: root_password
+
+    ports:
+      - "3307:3306"
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-proot_password"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+
+  # ==========================================================
+  # Spring Boot Application
+  # ==========================================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: income-statement-app
+
+    restart: unless-stopped
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+    ports:
+      - "8080:8080"
+
+    environment:
+
+      # ------------------------------------------------------
+      # Spring Database Configuration
+      # ------------------------------------------------------
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/income_statement_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: income_user
+      SPRING_DATASOURCE_PASSWORD: income_password
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+
+      # ------------------------------------------------------
+      # JPA Configuration
+      # ------------------------------------------------------
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "false"
+
+      # ------------------------------------------------------
+      # Application
+      # ------------------------------------------------------
+      SPRING_PROFILES_ACTIVE: docker
+
+      # ------------------------------------------------------
+      # API Key
+      # ------------------------------------------------------
+      APP_SECURITY_API_KEY: docker-secret-api-key
+
+      # ------------------------------------------------------
+      # AWS
+      # ------------------------------------------------------
+      AWS_REGION: us-east-1
+
+      # Your Bedrock model
+      BEDROCK_MODEL_ID: anthropic.claude-3-haiku-20240307-v1:0
+
+      # ------------------------------------------------------
+      # AWS credentials
+      # ------------------------------------------------------
+      # Configure these through your environment when running
+      # the container.
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+
+    volumes:
+      - ./uploads:/app/uploads
+
+
+# ============================================================
+# Persistent MySQL volume
+# ============================================================
+volumes:
+  mysql_data:

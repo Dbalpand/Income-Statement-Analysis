@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: income-statement-analysis
+
+
+aws:
+  access-key: YOUR_ACCESS_KEY
+  secret-key: YOUR_SECRET_KEY
+  region: us-east-1
+
+bedrock:
+  model-id: anthropic.claude-3-haiku-20240307-v1:0
