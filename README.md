@@ -1,4 +1,5 @@
 # Income Statement Analysis
+AI-powered financial document analysis backend built with Java and Spring Boot. Uses Tesseract OCR to extract data from income statements and AWS Bedrock with Anthropic Claude Haiku to generate structured financial insights and JSON output, with MySQL persistence, API-key authentication, REST APIs, exception handling, and automated processing.
 
 A Spring Boot backend that automates **income statement document analysis** using OCR and AWS Bedrock. The application accepts an income statement as a PDF or image, extracts its text using **Tesseract OCR**, sends the extracted content to **Amazon Bedrock (Claude 3 Haiku)** for structured financial-data extraction, and stores the analysis history in MySQL.
 
